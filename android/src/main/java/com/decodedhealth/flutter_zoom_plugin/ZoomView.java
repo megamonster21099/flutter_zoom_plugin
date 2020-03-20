@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
@@ -16,29 +17,28 @@ import us.zoom.sdk.JoinMeetingOptions;
 import us.zoom.sdk.JoinMeetingParams;
 import us.zoom.sdk.MeetingService;
 import us.zoom.sdk.MeetingStatus;
+import us.zoom.sdk.ZoomError;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
+import us.zoom.sdk.ZoomSDKInitParams;
 import us.zoom.sdk.ZoomSDKInitializeListener;
 
 public class ZoomView  implements PlatformView,
         MethodChannel.MethodCallHandler,
-        ZoomSDKAuthenticationListener
-{
-    //TODO: Implement event stream for meeting updates.
-    public static final String STREAM = "com.decodedhealth/zoom_event_stream";
-
-
+        ZoomSDKAuthenticationListener {
     private final TextView textView;
     private final MethodChannel methodChannel;
     private final Context context;
-
+    private final EventChannel meetingStatusChannel;
 
     ZoomView(Context context, BinaryMessenger messenger, int id) {
         textView = new TextView(context);
         this.context = context;
 
-        methodChannel = new MethodChannel(messenger, "flutter_zoom_plugin");
+        methodChannel = new MethodChannel(messenger, "com.decodedhealth/flutter_zoom_plugin");
         methodChannel.setMethodCallHandler(this);
+
+        meetingStatusChannel = new EventChannel(messenger, "com.decodedhealth/zoom_event_stream");
     }
 
     @Override
@@ -76,20 +76,30 @@ public class ZoomView  implements PlatformView,
             return;
         }
 
+        ZoomSDKInitParams initParams = new ZoomSDKInitParams();
+        initParams.appKey = options.get("appKey");
+        initParams.appSecret = options.get("appSecret");
+        initParams.domain = options.get("domain");
         zoomSDK.initialize(
                 context,
-                options.get("appKey"),
-                options.get("appSecret"),
-                options.get("domain"),
                 new ZoomSDKInitializeListener() {
                     @Override
                     public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
-
                         List<Integer> response = Arrays.asList(errorCode, internalErrorCode);
+
+                        if (errorCode != ZoomError.ZOOM_ERROR_SUCCESS) {
+                            System.out.println("Failed to initialize Zoom SDK");
+                            result.success(response);
+                            return;
+                        }
+
+                        ZoomSDK zoomSDK = ZoomSDK.getInstance();
+                        MeetingService meetingService = zoomSDK.getMeetingService();
+                        meetingStatusChannel.setStreamHandler(new StatusStreamHandler(meetingService));
                         result.success(response);
                     }
-                }
-        );
+                },
+                initParams);
     }
 
     private void joinMeeting(MethodCall methodCall, MethodChannel.Result result) {

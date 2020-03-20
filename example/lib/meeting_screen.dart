@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 
 class MeetingWidget extends StatelessWidget {
 
-  //TODO Implement event stream.
-  //static const stream = const EventChannel("com.decodedhealth/zoom_event_stream");
-
   ZoomOptions zoomOptions;
   ZoomMeetingOptions meetingOptions;
 
@@ -48,14 +45,25 @@ class MeetingWidget extends StatelessWidget {
             print(results);
 
             if(results[0] == 0) {
-              controller.joinMeeting(this.meetingOptions)
-                .then((joinMeetingResult) {
 
-                  controller.meetingStatus(this.meetingOptions.meetingId)
+              controller.zoomStatusEvents.listen((status) {
+                print("Status event: " + status[0] + " - " + status[1]);
+                if (status[0] == "MEETING_STATUS_IDLE" ||
+                    status[0] == "MEETING_STATUS_FAILED") {
+                  Navigator.of(context).pop();
+                }
+              });
+
+              print("listen on event channel");
+
+              controller.joinMeeting(this.meetingOptions)
+                  .then((joinMeetingResult) {
+
+                controller.meetingStatus(this.meetingOptions.meetingId)
                     .then((status) {
-                    print("Meeting Status: " + status[0] + " - " + status[1]);
-                  });
+                  print("Meeting Status: " + status[0] + " - " + status[1]);
                 });
+              });
             }
 
           }).catchError((error) {
@@ -63,10 +71,9 @@ class MeetingWidget extends StatelessWidget {
             print("Error");
             print(error);
           });
-        }),
+        })
       ),
     );
   }
-
 
 }
