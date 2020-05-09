@@ -85,7 +85,6 @@ public class ZoomView implements PlatformView,
         initParams.appKey = options.get("appKey");
         initParams.appSecret = options.get("appSecret");
         initParams.domain = options.get("domain");
-        zoomSDK.getMeetingSettingsHelper().setCustomizedMeetingUIEnabled(true);
         System.out.println("initParams.appKey " + initParams.appKey + " initParams.appSecret " + initParams.appSecret + "initParams.domain " + initParams.domain);
         zoomSDK.initialize(
                 context,
@@ -102,6 +101,7 @@ public class ZoomView implements PlatformView,
 
                         ZoomSDK zoomSDK = ZoomSDK.getInstance();
                         MeetingService meetingService = zoomSDK.getMeetingService();
+                        zoomSDK.getMeetingSettingsHelper().setCustomizedMeetingUIEnabled(true);
                         meetingStatusChannel.setStreamHandler(new StatusStreamHandler(meetingService));
                         result.success(response);
                     }
