@@ -1,6 +1,4 @@
-
 class ZoomOptions {
-
   String domain;
   String appKey;
   String appSecret;
@@ -13,7 +11,6 @@ class ZoomOptions {
 }
 
 class ZoomMeetingOptions {
-
   String userId;
   String meetingId;
   String meetingPassword;
@@ -21,14 +18,15 @@ class ZoomMeetingOptions {
   String disableDrive;
   String disableInvite;
   String disableShare;
+  String name;
 
-  ZoomMeetingOptions({
-    this.userId,
-    this.meetingId,
-    this.meetingPassword,
-    this.disableDialIn,
-    this.disableDrive,
-    this.disableInvite,
-    this.disableShare
-  });
+  ZoomMeetingOptions(
+      {this.userId,
+      this.meetingId,
+      this.meetingPassword,
+      this.disableDialIn,
+      this.disableDrive,
+      this.disableInvite,
+      this.disableShare,
+      this.name});
 }

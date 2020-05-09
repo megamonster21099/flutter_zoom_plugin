@@ -1,6 +1,8 @@
 package com.decodedhealth.flutter_zoom_plugin;
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -23,16 +25,19 @@ import us.zoom.sdk.ZoomSDKAuthenticationListener;
 import us.zoom.sdk.ZoomSDKInitParams;
 import us.zoom.sdk.ZoomSDKInitializeListener;
 
-public class ZoomView  implements PlatformView,
+public class ZoomView implements PlatformView,
         MethodChannel.MethodCallHandler,
         ZoomSDKAuthenticationListener {
+    private static final String TAG = ZoomView.class.getSimpleName();
     private final TextView textView;
     private final MethodChannel methodChannel;
     private final Context context;
     private final EventChannel meetingStatusChannel;
+    private final Activity activity;
 
-    ZoomView(Context context, BinaryMessenger messenger, int id) {
+    ZoomView(Context context, Activity activity, BinaryMessenger messenger, int id) {
         textView = new TextView(context);
+        this.activity = activity;
         this.context = context;
 
         methodChannel = new MethodChannel(messenger, "com.decodedhealth/flutter_zoom_plugin");
@@ -70,7 +75,7 @@ public class ZoomView  implements PlatformView,
 
         ZoomSDK zoomSDK = ZoomSDK.getInstance();
 
-        if(zoomSDK.isInitialized()) {
+        if (zoomSDK.isInitialized()) {
             List<Integer> response = Arrays.asList(0, 0);
             result.success(response);
             return;
@@ -80,6 +85,8 @@ public class ZoomView  implements PlatformView,
         initParams.appKey = options.get("appKey");
         initParams.appSecret = options.get("appSecret");
         initParams.domain = options.get("domain");
+        zoomSDK.getMeetingSettingsHelper().setCustomizedMeetingUIEnabled(true);
+        System.out.println("initParams.appKey " + initParams.appKey + " initParams.appSecret " + initParams.appSecret + "initParams.domain " + initParams.domain);
         zoomSDK.initialize(
                 context,
                 new ZoomSDKInitializeListener() {
@@ -98,6 +105,11 @@ public class ZoomView  implements PlatformView,
                         meetingStatusChannel.setStreamHandler(new StatusStreamHandler(meetingService));
                         result.success(response);
                     }
+
+                    @Override
+                    public void onZoomAuthIdentityExpired() {
+
+                    }
                 },
                 initParams);
     }
@@ -105,30 +117,9 @@ public class ZoomView  implements PlatformView,
     private void joinMeeting(MethodCall methodCall, MethodChannel.Result result) {
 
         Map<String, String> options = methodCall.arguments();
-
-        ZoomSDK zoomSDK = ZoomSDK.getInstance();
-
-        if(!zoomSDK.isInitialized()) {
-            System.out.println("Not initialized!!!!!!");
-            result.success(false);
-            return;
-        }
-
-        final MeetingService meetingService = zoomSDK.getMeetingService();
-
-        JoinMeetingOptions opts = new JoinMeetingOptions();
-        opts.no_invite = parseBoolean(options, "disableInvite", false);
-        opts.no_share = parseBoolean(options, "disableShare", false);
-        opts.no_driving_mode = parseBoolean(options, "disableDrive", false);
-        opts.no_dial_in_via_phone = parseBoolean(options, "disableDialIn", false);
-
-        JoinMeetingParams params = new JoinMeetingParams();
-
-        params.displayName = options.get("userId");
-        params.meetingNo = options.get("meetingId");
-        params.password = options.get("meetingPassword");
-
-        meetingService.joinMeetingWithParams(context, params, opts);
+        Log.i(TAG, "Opening zoom Activity");
+        activity.startActivity(MeetingRoomActivity.getLaunchIntent(activity, options.get("meetingId"),
+                options.get("meetingPassword"), options.get("appKey"), options.get("appSecret"), options.get("domain"), options.get("name")));
 
         result.success(true);
     }
@@ -142,7 +133,7 @@ public class ZoomView  implements PlatformView,
 
         ZoomSDK zoomSDK = ZoomSDK.getInstance();
 
-        if(!zoomSDK.isInitialized()) {
+        if (!zoomSDK.isInitialized()) {
             System.out.println("Not initialized!!!!!!");
             result.success(Arrays.asList("MEETING_STATUS_UNKNOWN", "SDK not initialized"));
             return;
@@ -150,17 +141,18 @@ public class ZoomView  implements PlatformView,
 
         MeetingService meetingService = zoomSDK.getMeetingService();
 
-        if(meetingService == null) {
+        if (meetingService == null) {
             result.success(Arrays.asList("MEETING_STATUS_UNKNOWN", "No status available"));
             return;
         }
 
         MeetingStatus status = meetingService.getMeetingStatus();
-        result.success(status != null ? Arrays.asList(status.name(), "") :  Arrays.asList("MEETING_STATUS_UNKNOWN", "No status available"));
+        result.success(status != null ? Arrays.asList(status.name(), "") : Arrays.asList("MEETING_STATUS_UNKNOWN", "No status available"));
     }
 
     @Override
-    public void dispose() {}
+    public void dispose() {
+    }
 
 
     @Override
@@ -175,6 +167,11 @@ public class ZoomView  implements PlatformView,
 
     @Override
     public void onZoomIdentityExpired() {
+
+    }
+
+    @Override
+    public void onZoomAuthIdentityExpired() {
 
     }
 }

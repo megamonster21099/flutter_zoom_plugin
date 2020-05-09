@@ -4,7 +4,6 @@ import 'package:flutter_zoom_plugin/zoom_options.dart';
 import 'package:flutter/material.dart';
 
 class MeetingWidget extends StatelessWidget {
-
   ZoomOptions zoomOptions;
   ZoomMeetingOptions meetingOptions;
 
@@ -21,8 +20,8 @@ class MeetingWidget extends StatelessWidget {
         disableDialIn: "true",
         disableDrive: "true",
         disableInvite: "true",
-        disableShare: "true"
-    );
+        disableShare: "true",
+        name: "My Name");
   }
 
   @override
@@ -30,50 +29,44 @@ class MeetingWidget extends StatelessWidget {
     // Use the Todo to create the UI.
     return Scaffold(
       appBar: AppBar(
-          title: Text('Loading meeting '),
+        title: Text('Loading meeting '),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: ZoomView(onViewCreated: (controller) {
+          padding: EdgeInsets.all(16.0),
+          child: ZoomView(onViewCreated: (controller) {
+            print("Created the view");
 
-          print("Created the view");
+            controller.initZoom(this.zoomOptions).then((results) {
+              print("initialised");
+              print(results);
 
-          controller.initZoom(this.zoomOptions)
-              .then((results) {
-
-            print("initialised");
-            print(results);
-
-            if(results[0] == 0) {
-
-              controller.zoomStatusEvents.listen((status) {
-                print("Status event: " + status[0] + " - " + status[1]);
-                if (status[0] == "MEETING_STATUS_IDLE" ||
-                    status[0] == "MEETING_STATUS_FAILED") {
-                  Navigator.of(context).pop();
-                }
-              });
-
-              print("listen on event channel");
-
-              controller.joinMeeting(this.meetingOptions)
-                  .then((joinMeetingResult) {
-
-                controller.meetingStatus(this.meetingOptions.meetingId)
-                    .then((status) {
-                  print("Meeting Status: " + status[0] + " - " + status[1]);
+              if (results[0] == 0) {
+                controller.zoomStatusEvents.listen((status) {
+                  print("Status event: " + status[0] + " - " + status[1]);
+                  if (status[0] == "MEETING_STATUS_IDLE" ||
+                      status[0] == "MEETING_STATUS_FAILED") {
+                    Navigator.of(context).pop();
+                  }
                 });
-              });
-            }
 
-          }).catchError((error) {
+                print("listen on event channel");
 
-            print("Error");
-            print(error);
-          });
-        })
-      ),
+                controller
+                    .joinMeeting(this.meetingOptions,
+                        appOptions: this.zoomOptions)
+                    .then((joinMeetingResult) {
+                  controller
+                      .meetingStatus(this.meetingOptions.meetingId)
+                      .then((status) {
+                    print("Meeting Status: " + status[0] + " - " + status[1]);
+                  });
+                });
+              }
+            }).catchError((error) {
+              print("Error");
+              print(error);
+            });
+          })),
     );
   }
-
 }

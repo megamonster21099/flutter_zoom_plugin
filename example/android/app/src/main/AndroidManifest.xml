@@ -9,6 +9,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="flutter_zoom_plugin_example"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -36,5 +37,16 @@
                 android:hardwareAccelerated="false"
                 android:theme="@style/ZMTheme.SubWindow"
                 android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.decodedhealth.flutter_zoom_plugin.MyMeetingActivity"
+            android:configChanges="screenSize"
+            android:theme="@style/ZMTheme.SubWindow"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.decodedhealth.flutter_zoom_plugin.MeetingRoomActivity"
+            android:configChanges="screenSize"
+            android:theme="@style/ZMTheme.SubWindow"
+            android:screenOrientation="portrait"/>
     </application>
 </manifest>
