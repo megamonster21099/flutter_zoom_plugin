@@ -8,6 +8,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -50,12 +51,16 @@ import com.decodedhealth.flutter_zoom_plugin.view.adapter.AttenderVideoAdapter;
 import com.decodedhealth.flutter_zoom_plugin.view.share.AnnotateToolbar;
 import com.decodedhealth.flutter_zoom_plugin.view.share.CustomShareView;
 
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.List;
 
 import us.zoom.androidlib.app.ZMActivity;
 import us.zoom.androidlib.widget.ZMAlertDialog;
@@ -86,21 +91,20 @@ import static us.zoom.sdk.MobileRTCSDKError.SDKERR_SUCCESS;
 
 public class MyMeetingActivity extends ZMActivity implements View.OnClickListener, MeetingVideoCallback.VideoEvent,
         MeetingAudioCallback.AudioEvent, MeetingShareCallback.ShareEvent,
-        MeetingUserCallback.UserEvent, MeetingCommonCallback.CommonEvent, SmsListener {
+        MeetingUserCallback.UserEvent, MeetingCommonCallback.CommonEvent, SmsListener, LifecycleObserver {
+
+    public static Intent getLaunchIntent(final Context context) {
+        Intent intent = new Intent(context, MyMeetingActivity.class);
+        return intent;
+    }
 
     private final static String TAG = MyMeetingActivity.class.getSimpleName();
 
     public final static int REQUEST_PLIST = 1001;
-
     public final static int REQUEST_CAMERA_CODE = 1010;
-
     public final static int REQUEST_AUDIO_CODE = 1011;
-
     public final static int REQUEST_SHARE_SCREEN_PERMISSION = 1001;
-
     protected final static int REQUEST_SYSTEM_ALERT_WINDOW = 1002;
-
-    private int from = 0;
 
     private int currentLayoutType = -1;
     private final int LAYOUT_TYPE_PREVIEW = 0;
@@ -117,53 +121,36 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
     private View mWaitRoomView;
     private TextView mConnectingText;
     private Button mBtnJoinBo;
-
     private LinearLayout videoListLayout;
-
     private boolean mMeetingFailed = false;
-
     public static long mCurShareUserId = -1;
-
     private MobileRTCVideoView mDefaultVideoView;
     private MobileRTCVideoViewManager mDefaultVideoViewMgr;
-
     private MeetingAudioHelper meetingAudioHelper;
-
     private MeetingVideoHelper meetingVideoHelper;
-
     private MeetingShareHelper meetingShareHelper;
-
     private MeetingRemoteControlHelper remoteControlHelper;
-
     private MeetingService mMeetingService;
-
     private InMeetingService mInMeetingService;
-
     private Intent mScreenInfoData;
-
     private MobileRTCShareView mShareView;
     private AnnotateToolbar mDrawingView;
     private FrameLayout mMeetingVideoView;
-
     private View mNormalSenceView;
-
     private CustomShareView customShareView;
-
     private RecyclerView mVideoListView;
-
     private AttenderVideoAdapter mAdapter;
-
     MeetingOptionBar meetingOptionBar;
-
     private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Utils.convertActivityToTranslucent(this);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
 
         mMeetingService = ZoomSDK.getInstance().getMeetingService();
         mInMeetingService = ZoomSDK.getInstance().getInMeetingService();
@@ -172,9 +159,6 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
             return;
         }
 
-        if (null != getIntent().getExtras()) {
-            from = getIntent().getExtras().getInt("from");
-        }
         meetingAudioHelper = new MeetingAudioHelper(audioCallBack);
         meetingVideoHelper = new MeetingVideoHelper(this, videoCallBack);
         meetingShareHelper = new MeetingShareHelper(this, shareCallBack);
@@ -219,14 +203,30 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         refreshToolbar();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    public void onAppOnCreate() {
+        Log.i(TAG, "onAppOnCreate");
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    public void onAppOnStart() {
+        Log.i(TAG, "onAppOnStart");
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    public void onAppOnResume() {
+        Log.i(TAG, "onAppOnResume");
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    public void onAppOnPause() {
+        Log.i(TAG, "onAppOnPause");
+        leave(false);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    public void onAppBackgrounded() {
+        Log.i(TAG, "onAppBackgrounded");
     }
 
     MeetingVideoHelper.VideoCallBack videoCallBack = new MeetingVideoHelper.VideoCallBack() {
@@ -630,19 +630,7 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Log.i(TAG, "onStart");
-    }
-
-    @Override
     protected void onPause() {
-        Log.i(TAG, "OnPause");
-        ZoomSDK zoomSDK = ZoomSDK.getInstance();
-        MeetingService meetingService = zoomSDK.getMeetingService();
-        if (meetingService != null) {
-            meetingService.leaveCurrentMeeting(false);
-        }
         super.onPause();
         mDefaultVideoView.onPause();
     }
@@ -735,22 +723,8 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
 
     @Override
     public void onBackPressed() {
-        if (mMeetingService.getMeetingStatus() == MeetingStatus.MEETING_STATUS_INMEETING) {
-            //stop share
-            if (currentLayoutType == LAYOUT_TYPE_VIEW_SHARE) {
-                mDefaultVideoViewMgr.removeShareVideoUnit();
-                currentLayoutType = -1;
-            }
-            if (from == 3) {
-                ZoomSDK.getInstance().getMeetingService().leaveCurrentMeeting(false);
-                finish();
-            } else {
-                showMainActivity();
-            }
-
-        } else {
-            showLeaveMeetingDialog();
-        }
+        Log.i(TAG, "onBackPressed");
+        showLeaveMeetingDialog();
     }
 
 
@@ -762,13 +736,6 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         }
         videoListLayout.setLayoutParams(params);
         videoListLayout.bringToFront();
-    }
-
-
-    private void showMainActivity() {
-        Intent intent = new Intent(this, MeetingRoomActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivity(intent);
     }
 
     Dialog builder;
@@ -840,18 +807,6 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         }
     }
 
-
-    boolean finished = false;
-
-    @Override
-    public void finish() {
-        if (!finished) {
-            showMainActivity();
-        }
-        finished = true;
-        super.finish();
-    }
-
     private void showLeaveMeetingDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if (mInMeetingService.isMeetingConnected()) {
@@ -903,8 +858,8 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         if (meetingShareHelper.isSharingOut()) {
             meetingShareHelper.stopShare();
         }
-        finish();
         mInMeetingService.leaveCurrentMeeting(end);
+        finish();
     }
 
     private void leaveBo() {

@@ -18,12 +18,14 @@ import io.flutter.plugin.platform.PlatformView;
 import us.zoom.sdk.JoinMeetingOptions;
 import us.zoom.sdk.JoinMeetingParams;
 import us.zoom.sdk.MeetingService;
+import us.zoom.sdk.MeetingServiceListener;
 import us.zoom.sdk.MeetingStatus;
 import us.zoom.sdk.ZoomError;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
 import us.zoom.sdk.ZoomSDKInitParams;
 import us.zoom.sdk.ZoomSDKInitializeListener;
+import us.zoom.sdk.ZoomSDKRawDataMemoryMode;
 
 public class ZoomView implements PlatformView,
         MethodChannel.MethodCallHandler,
@@ -85,7 +87,9 @@ public class ZoomView implements PlatformView,
         initParams.appKey = options.get("appKey");
         initParams.appSecret = options.get("appSecret");
         initParams.domain = options.get("domain");
-        System.out.println("initParams.appKey " + initParams.appKey + " initParams.appSecret " + initParams.appSecret + "initParams.domain " + initParams.domain);
+        initParams.enableLog = true;
+        initParams.logSize = 50;
+        initParams.videoRawDataMemoryMode = ZoomSDKRawDataMemoryMode.ZoomSDKRawDataMemoryModeStack;
         zoomSDK.initialize(
                 context,
                 new ZoomSDKInitializeListener() {
@@ -102,6 +106,8 @@ public class ZoomView implements PlatformView,
                         ZoomSDK zoomSDK = ZoomSDK.getInstance();
                         MeetingService meetingService = zoomSDK.getMeetingService();
                         zoomSDK.getMeetingSettingsHelper().setCustomizedMeetingUIEnabled(true);
+                        ZoomSDK.getInstance().getSmsService().enableZoomAuthRealNameMeetingUIShown(false);
+                        ZoomSDK.getInstance().getMeetingSettingsHelper().enable720p(false);
                         meetingStatusChannel.setStreamHandler(new StatusStreamHandler(meetingService));
                         result.success(response);
                     }
@@ -114,14 +120,25 @@ public class ZoomView implements PlatformView,
                 initParams);
     }
 
-    private void joinMeeting(MethodCall methodCall, MethodChannel.Result result) {
+    private void joinMeeting(MethodCall methodCall, final MethodChannel.Result result) {
+        final Map<String, String> options = methodCall.arguments();
 
-        Map<String, String> options = methodCall.arguments();
-        Log.i(TAG, "Opening zoom Activity");
-        activity.startActivity(MeetingRoomActivity.getLaunchIntent(activity, options.get("meetingId"),
-                options.get("meetingPassword"), options.get("appKey"), options.get("appSecret"), options.get("domain"), options.get("name")));
+        ZoomSDK.getInstance().getMeetingService().addListener(new MeetingServiceListener() {
+            @Override
+            public void onMeetingStatusChanged(MeetingStatus meetingStatus, int errorCode, int internalErrorCode) {
+                Log.d(TAG, "onMeetingStatusChanged " + meetingStatus);
+                if (meetingStatus == MeetingStatus.MEETING_STATUS_CONNECTING) {
+                    activity.startActivity(MyMeetingActivity.getLaunchIntent(activity));
+                    //result.success(true);
+                }
+            }
+        });
 
-        result.success(true);
+        JoinMeetingParams params = new JoinMeetingParams();
+        params.meetingNo = options.get("meetingId");
+        params.password = options.get("meetingPassword");
+        params.displayName = options.get("name");
+        ZoomSDK.getInstance().getMeetingService().joinMeetingWithParams(context, params);
     }
 
     private boolean parseBoolean(Map<String, String> options, String property, boolean defaultValue) {
