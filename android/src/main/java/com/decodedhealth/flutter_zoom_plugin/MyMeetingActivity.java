@@ -221,12 +221,12 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     public void onAppOnPause() {
         Log.i(TAG, "onAppOnPause");
-        //leave(false);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    public void onAppBackgrounded() {
-        Log.i(TAG, "onAppBackgrounded");
+    public void onAppOnStop() {
+        Log.i(TAG, "onAppOnStop");
+        leave(false);
     }
 
     MeetingVideoHelper.VideoCallBack videoCallBack = new MeetingVideoHelper.VideoCallBack() {
