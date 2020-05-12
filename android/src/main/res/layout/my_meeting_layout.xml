@@ -1,31 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root_view"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
 
     <RelativeLayout
+        android:id="@+id/layout_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/option_bar_top"
+        android:layout_marginBottom="@dimen/option_bar_bottom"
+        android:focusable="true"
         android:gravity="center_horizontal">
 
         <FrameLayout
             android:id="@+id/meetingVideoView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:focusable="false" />
 
         <FrameLayout
             android:id="@+id/share_contain"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignWithParentIfMissing="true"
+            android:clickable="false"
+            android:focusable="false"
             android:orientation="vertical">
 
             <us.zoom.sdk.MobileRTCShareView
                 android:id="@+id/sharingView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clickable="false"
+                android:focusable="false"
                 android:visibility="gone" />
 
             <com.decodedhealth.flutter_zoom_plugin.view.share.AnnotateToolbar
@@ -33,6 +44,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:clickable="false"
+                android:focusable="false"
                 android:visibility="gone" />
         </FrameLayout>
 
@@ -41,8 +54,10 @@
             android:id="@+id/videoListLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignWithParentIfMissing="true"
             android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:clickable="false"
+            android:focusable="false"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -50,70 +65,84 @@
                 android:id="@+id/videoList_indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:focusable="true"
+                android:clickable="false"
+                android:focusable="false"
                 android:src="@drawable/arrow_down_normal" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/videoList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="false"
                 android:clipChildren="true"
                 android:clipToPadding="true"
                 android:focusable="false" />
         </com.decodedhealth.flutter_zoom_plugin.view.VideoListLayout>
-
-
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false">
 
-    <Button
-        android:id="@+id/btn_join_bo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="100dp"
-        android:text="Join Bo"
-        android:visibility="gone" />
+        <Button
+            android:id="@+id/btn_join_bo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="100dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:text="Join Bo"
+            android:visibility="gone" />
 
-    <Button
-        android:id="@+id/btn_request_help"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="100dp"
-        android:text="Request for Help"
-        android:visibility="gone" />
+        <Button
+            android:id="@+id/btn_request_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="100dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:text="Request for Help"
+            android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/connectingTxt"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:layout_gravity="top|left"
-        android:gravity="center"
-        android:text="Connecting..."
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/connectingTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="top|left"
+            android:clickable="false"
+            android:focusable="false"
+            android:gravity="center"
+            android:text="Connecting..."
+            android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/waitJoinView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Wait host to start this meeting..."
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/waitJoinView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:focusable="false"
+            android:text="Wait host to start this meeting..."
+            android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/waitingRoom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Please wait, the meeting host will let you in soon."
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/waitingRoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:focusable="false"
+            android:text="Please wait, the meeting host will let you in soon."
+            android:visibility="gone" />
+    </RelativeLayout>
 
     <com.decodedhealth.flutter_zoom_plugin.view.MeetingOptionBar
         android:id="@+id/meeting_option_contain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"></com.decodedhealth.flutter_zoom_plugin.view.MeetingOptionBar>
-
-
+        android:visibility="invisible" />
 </FrameLayout>

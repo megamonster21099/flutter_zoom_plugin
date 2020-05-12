@@ -1,77 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/zm_top_toolbar_bg">
+    tools:background="@color/black">
 
-    <LinearLayout
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-        android:padding="12dp"
-        android:gravity="center">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/gray" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icon_shrink" />
-    </LinearLayout>
-
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/btnSwitchCamera"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/btnBack"
-        android:layout_marginLeft="6dp"
-        android:gravity="center">
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/selector_rect"
+        android:clickable="true"
+        android:focusable="true"
+        android:nextFocusRight="@+id/btnLeave"
+        android:nextFocusDown="@+id/layout_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:duplicateParentState="true"
+            android:layout_width="@dimen/option_image_size"
+            android:layout_height="@dimen/option_image_size"
+            android:layout_gravity="center"
+            android:clickable="false"
             android:focusable="false"
             android:src="@drawable/icon_switch_camera" />
-    </LinearLayout>
+    </FrameLayout>
 
-
-    <Button
+    <FrameLayout
         android:id="@+id/btnLeaveZoomMeeting"
-        style="@style/ZMButton.TitleBar.Warning"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:layout_marginRight="6dp"
-        android:text="Leave" />
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/selector_rect"
+        android:clickable="true"
+        android:focusable="true"
+        android:nextFocusLeft="@+id/btnSwitchCamera"
+        android:nextFocusDown="@+id/layout_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:ellipsize="end"
+            android:focusable="false"
+            android:maxLines="1"
+            android:text="@string/btn_leave"
+            android:textColor="@color/white"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignWithParentIfMissing="true"
         android:layout_centerVertical="true"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:layout_toStartOf="@+id/btnLeaveZoomMeeting"
+        android:layout_toEndOf="@+id/btnSwitchCamera"
+        android:clickable="false"
+        android:focusable="false"
+        android:gravity="center"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/meetingNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
             android:textColor="@color/zm_white"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            tools:text="123456789" />
 
         <TextView
             android:id="@+id/txtPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
             android:textColor="@color/zm_white"
             android:textSize="15sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:text="123456"
+            tools:visibility="visible" />
     </LinearLayout>
 
 

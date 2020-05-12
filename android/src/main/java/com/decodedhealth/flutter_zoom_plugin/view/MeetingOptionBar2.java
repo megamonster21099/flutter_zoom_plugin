@@ -1,11 +1,9 @@
 package com.decodedhealth.flutter_zoom_plugin.view;
 
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +13,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
+import com.decodedhealth.flutter_zoom_plugin.BuildConfig;
+import com.decodedhealth.flutter_zoom_plugin.R;
+import com.decodedhealth.flutter_zoom_plugin.view.adapter.SimpleMenuAdapter;
+import com.decodedhealth.flutter_zoom_plugin.view.adapter.SimpleMenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,12 +31,7 @@ import us.zoom.sdk.InMeetingVideoController;
 import us.zoom.sdk.InMeetingWebinarController;
 import us.zoom.sdk.ZoomSDK;
 
-import com.decodedhealth.flutter_zoom_plugin.BuildConfig;
-import com.decodedhealth.flutter_zoom_plugin.R;
-import com.decodedhealth.flutter_zoom_plugin.view.adapter.SimpleMenuAdapter;
-import com.decodedhealth.flutter_zoom_plugin.view.adapter.SimpleMenuItem;
-
-public class MeetingOptionBar extends FrameLayout implements View.OnClickListener {
+public class MeetingOptionBar2 extends FrameLayout implements View.OnClickListener {
 
     private static final String TAG = "MeetingOptionBar";
     private final int MENU_DISCONNECT_AUDIO = 0;
@@ -67,8 +65,6 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
     private View mBtnShare;
     private View mBtnCamera;
     private View mBtnAudio;
-    private View mBtnPlist;
-    private View mBtnMore;
     private View mBtnSwitchCamera;
 
     private ImageView mAudioStatusImg;
@@ -81,8 +77,6 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
     private TextView mMeetingVideoText;
     private TextView mMeetingShareText;
 
-
-    private View currentFocused = null;
 
     private InMeetingService mInMeetingService;
     private InMeetingShareController mInMeetingShareController;
@@ -124,18 +118,18 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
     }
 
 
-    public MeetingOptionBar(Context context) {
+    public MeetingOptionBar2(Context context) {
         super(context);
         init(context);
     }
 
-    public MeetingOptionBar(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MeetingOptionBar2(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context);
 
     }
 
-    public MeetingOptionBar(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MeetingOptionBar2(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
     }
@@ -170,8 +164,7 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
         mBtnCamera.setOnClickListener(this);
         mBtnAudio = findViewById(R.id.btnAudio);
         mBtnAudio.setOnClickListener(this);
-        mBtnPlist = findViewById(R.id.btnPlist);
-        mBtnPlist.setOnClickListener(this);
+        findViewById(R.id.btnPlist).setOnClickListener(this);
 
         mAudioStatusImg = findViewById(R.id.audioStatusImage);
         mVideoStatusImg = findViewById(R.id.videotatusImage);
@@ -182,8 +175,7 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
         mMeetingShareText = findViewById(R.id.text_share);
 
 
-        mBtnMore = findViewById(R.id.moreActionImg);
-        mBtnMore.setOnClickListener(this);
+        findViewById(R.id.moreActionImg).setOnClickListener(this);
 
         mBtnSwitchCamera = findViewById(R.id.btnSwitchCamera);
         mBtnSwitchCamera.setOnClickListener(this);
@@ -191,107 +183,29 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
         mMeetingNumberText = findViewById(R.id.meetingNumber);
         mMeetingPasswordText = findViewById(R.id.txtPassword);
 
-        setVisibility(View.VISIBLE);
 
-
-        mBtnSwitchCamera.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    currentFocused = v;
-                }
-            }
-        });
-
-        mBtnLeave.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    currentFocused = v;
-                }
-            }
-        });
-        mBtnAudio.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    currentFocused = v;
-                }
-            }
-        });
-        mBtnCamera.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    currentFocused = v;
-                }
-            }
-        });
-        mBtnPlist.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    currentFocused = v;
-                }
-            }
-        });
-        mBtnMore.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    currentFocused = v;
-                }
-            }
-        });
+        findViewById(R.id.btnBack).setOnClickListener(this);
     }
 
-    public void restoreFocus() {
-        if (currentFocused == null) {
-            Log.i(TAG, "restoreFocus to mBtnAudio");
-            mBtnAudio.requestFocus();
-            return;
+    Runnable autoHidden = new Runnable() {
+        @Override
+        public void run() {
+            hideOrShowToolbar(true);
         }
-        if (currentFocused == mBtnAudio
-                || currentFocused == mBtnCamera
-                || currentFocused == mBtnShare
-                || currentFocused == mBtnPlist
-                || currentFocused == mBtnMore) {
-            Log.i(TAG, "restoreFocus to mBtnLeave");
-            mBtnLeave.requestFocus();
-        } else if (currentFocused == mBtnSwitchCamera) {
-            Log.i(TAG, "restoreFocus to mBtnAudio");
-            mBtnAudio.requestFocus();
-        } else if (currentFocused == mBtnLeave) {
-            Log.i(TAG, "restoreFocus to mBtnMore");
-            mBtnMore.requestFocus();
-        }
-    }
-
-    //    @Override
-//    public boolean dispatchKeyEvent(KeyEvent event) {
-//        Log.i(TAG, event.getAction() + " " + event.getKeyCode());
-//        return true;
-//    }
-
-//    Runnable autoHidden = new Runnable() {
-//        @Override
-//        public void run() {
-//            hideOrShowToolbar(true);
-//        }
-//    };
+    };
 
     public void hideOrShowToolbar(boolean hidden) {
-//        removeCallbacks(autoHidden);
-//        if (hidden) {
-//            setVisibility(View.INVISIBLE);
-//        } else {
-//            postDelayed(autoHidden, 5000);
-//            setVisibility(View.VISIBLE);
-//            bringToFront();
-//        }
-//        if (null != mCallBack) {
-//            mCallBack.onHidden(hidden);
-//        }
+        removeCallbacks(autoHidden);
+        if (hidden) {
+            setVisibility(View.INVISIBLE);
+        } else {
+            postDelayed(autoHidden, 3000);
+            setVisibility(View.VISIBLE);
+            bringToFront();
+        }
+        if (null != mCallBack) {
+            mCallBack.onHidden(hidden);
+        }
     }
 
 
@@ -365,10 +279,10 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
         } else {
             mBtnShare.setVisibility(View.VISIBLE);
             if (mInMeetingShareController.isSharingOut()) {
-                mMeetingShareText.setText(R.string.btn_stop_share);
+                mMeetingShareText.setText("Stop share");
                 mShareStatusImg.setImageResource(R.drawable.icon_share_pause);
             } else {
-                mMeetingShareText.setText(R.string.btn_share);
+                mMeetingShareText.setText("Share");
                 mShareStatusImg.setImageResource(R.drawable.icon_share_resume);
             }
         }
@@ -395,12 +309,11 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
 
 
         int id = v.getId();
-//        if (id == R.id.btnBack) {
-//            if (null != mCallBack) {
-//                mCallBack.onClickBack();
-//            }
-//        } else
-        if (id == R.id.btnLeaveZoomMeeting) {
+        if (id == R.id.btnBack) {
+            if (null != mCallBack) {
+                mCallBack.onClickBack();
+            }
+        } else if (id == R.id.btnLeaveZoomMeeting) {
             if (null != mCallBack) {
                 mCallBack.onClickLeave();
             }
@@ -427,7 +340,7 @@ public class MeetingOptionBar extends FrameLayout implements View.OnClickListene
                 mCallBack.onClickChats();
             }
         } else {
-            //setVisibility(INVISIBLE);
+            setVisibility(INVISIBLE);
         }
 
     }

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="option_bar_top">100dp</dimen>
+    <dimen name="option_bar_bottom">100dp</dimen>
+    <dimen name="option_image_size">48dp</dimen>
+    <dimen name="option_text_size">20sp</dimen>
     <dimen name="size_video_item_margin">5dp</dimen>
     <dimen name="size_video_item">100dp</dimen>
     <dimen name="video_bottom_margin">17dp</dimen>

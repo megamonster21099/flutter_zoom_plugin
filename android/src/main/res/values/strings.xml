@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="this_app_name">Zoom SDK Demo</string>
-    
-    <string name="invite_acitivity_name">Meeting Invite Example</string>
 
+    <string name="btn_audio">Audio</string>
+    <string name="btn_video">Video</string>
+    <string name="btn_share">Share</string>
+    <string name="btn_stop_share">Stop share</string>
+    <string name="btn_chats">Chats</string>
+    <string name="btn_more">More</string>
+    <string name="btn_leave">Leave</string>
+
+    <string name="invite_acitivity_name">Meeting Invite Example</string>
     <string name="zm_rc_using_fingers_for_remote_control">Remotely control a desktop using gestures</string>
     <string name="zm_rc_one_finger_tap">Tap with one finger</string>
     <string name="zm_rc_one_finger_tap_description">Tap the screen with one finger to click the mouse</string>

@@ -61,7 +61,6 @@ import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import us.zoom.androidlib.app.ZMActivity;
 import us.zoom.androidlib.widget.ZMAlertDialog;
 import us.zoom.sdk.IBOAssistant;
@@ -89,16 +88,16 @@ import us.zoom.sdk.ZoomSDKCountryCode;
 
 import static us.zoom.sdk.MobileRTCSDKError.SDKERR_SUCCESS;
 
-public class MyMeetingActivity extends ZMActivity implements View.OnClickListener, MeetingVideoCallback.VideoEvent,
+public class MyMeetingActivity2 extends ZMActivity implements View.OnClickListener, MeetingVideoCallback.VideoEvent,
         MeetingAudioCallback.AudioEvent, MeetingShareCallback.ShareEvent,
         MeetingUserCallback.UserEvent, MeetingCommonCallback.CommonEvent, SmsListener, LifecycleObserver {
 
     public static Intent getLaunchIntent(final Context context) {
-        Intent intent = new Intent(context, MyMeetingActivity.class);
+        Intent intent = new Intent(context, MyMeetingActivity2.class);
         return intent;
     }
 
-    private final static String TAG = MyMeetingActivity.class.getSimpleName();
+    private final static String TAG = MyMeetingActivity2.class.getSimpleName();
 
     public final static int REQUEST_PLIST = 1001;
     public final static int REQUEST_CAMERA_CODE = 1010;
@@ -141,8 +140,7 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
     private RecyclerView mVideoListView;
     private AttenderVideoAdapter mAdapter;
     MeetingOptionBar meetingOptionBar;
-    //private GestureDetector gestureDetector;
-    private RelativeLayout layoutContent;
+    private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,36 +166,29 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
 
         setContentView(R.layout.my_meeting_layout);
 
-        layoutContent = findViewById(R.id.layout_content);
-        layoutContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                onLayoutContentFocusChanged(v, hasFocus);
-            }
-        });
-        //gestureDetector = new GestureDetector(new GestureDetectorListener());
-        meetingOptionBar = findViewById(R.id.meeting_option_contain);
+        gestureDetector = new GestureDetector(new GestureDetectorListener());
+        meetingOptionBar = (MeetingOptionBar) findViewById(R.id.meeting_option_contain);
         meetingOptionBar.setCallBack(callBack);
-        mMeetingVideoView = findViewById(R.id.meetingVideoView);
-        mShareView = findViewById(R.id.sharingView);
-        mDrawingView = findViewById(R.id.drawingView);
+        mMeetingVideoView = (FrameLayout) findViewById(R.id.meetingVideoView);
+        mShareView = (MobileRTCShareView) findViewById(R.id.sharingView);
+        mDrawingView = (AnnotateToolbar) findViewById(R.id.drawingView);
 
-        mWaitJoinView = findViewById(R.id.waitJoinView);
-        mWaitRoomView = findViewById(R.id.waitingRoom);
+        mWaitJoinView = (View) findViewById(R.id.waitJoinView);
+        mWaitRoomView = (View) findViewById(R.id.waitingRoom);
 
         LayoutInflater inflater = getLayoutInflater();
 
         mNormalSenceView = inflater.inflate(R.layout.layout_meeting_content_normal, null);
-        mDefaultVideoView = mNormalSenceView.findViewById(R.id.videoView);
+        mDefaultVideoView = (MobileRTCVideoView) mNormalSenceView.findViewById(R.id.videoView);
 
-        customShareView = mNormalSenceView.findViewById(R.id.custom_share_view);
+        customShareView = (CustomShareView) mNormalSenceView.findViewById(R.id.custom_share_view);
         remoteControlHelper = new MeetingRemoteControlHelper(customShareView);
         mMeetingVideoView.addView(mNormalSenceView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        mConnectingText = findViewById(R.id.connectingTxt);
-        mBtnJoinBo = findViewById(R.id.btn_join_bo);
+        mConnectingText = (TextView) findViewById(R.id.connectingTxt);
+        mBtnJoinBo = (Button) findViewById(R.id.btn_join_bo);
 
-        mVideoListView = findViewById(R.id.videoList);
+        mVideoListView = (RecyclerView) findViewById(R.id.videoList);
         mVideoListView.bringToFront();
 
         videoListLayout = findViewById(R.id.videoListLayout);
@@ -237,27 +228,12 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         leave(false);
     }
 
-    private void onLayoutContentFocusChanged(View v, boolean hasFocus) {
-        Log.i(TAG, "onFocusChanged " + hasFocus + " " + currentLayoutType);
-        //FIXME: Handle different layout type
-        meetingOptionBar.restoreFocus();
-//        if (hasFocus) {
-//            switch (currentLayoutType) {
-//                case LAYOUT_TYPE_ONLY_MYSELF:
-//                    meetingOptionBar.restoreFocus();
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-    }
-
     MeetingVideoHelper.VideoCallBack videoCallBack = new MeetingVideoHelper.VideoCallBack() {
         @Override
         public boolean requestVideoPermission() {
 
             if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(MyMeetingActivity.this, new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE);
+                ActivityCompat.requestPermissions(MyMeetingActivity2.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE);
                 return false;
             }
             return true;
@@ -272,8 +248,8 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
     MeetingAudioHelper.AudioCallBack audioCallBack = new MeetingAudioHelper.AudioCallBack() {
         @Override
         public boolean requestAudioPermission() {
-            if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(MyMeetingActivity.this, new String[]{android.Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_CODE);
+            if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MyMeetingActivity2.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_CODE);
                 return false;
             }
             return true;
@@ -321,41 +297,41 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         }
     }
 
-//    class GestureDetectorListener extends GestureDetector.SimpleOnGestureListener {
-//
-//        public GestureDetectorListener() {
-//            super();
-//        }
-//
-//        @Override
-//        public boolean onSingleTapUp(MotionEvent e) {
-//
-//            if (mDrawingView.isAnnotationStarted() || remoteControlHelper.isEnableRemoteControl()) {
-//                meetingOptionBar.hideOrShowToolbar(true);
-//                return true;
-//            }
-//            int orientation = getResources().getConfiguration().orientation;
-//            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//                if ((videoListLayout.getVisibility() == View.VISIBLE && (e.getX() >= videoListLayout.getLeft() || e.getY() <= meetingOptionBar.getTopBarHeight())) || e.getY() >= meetingOptionBar.getBottomBarTop()) {
-//                    return true;
-//                }
-//            } else {
-//                if ((videoListLayout.getVisibility() == View.VISIBLE && (e.getY() >= videoListLayout.getTop() || e.getY() <= meetingOptionBar.getTopBarHeight())) || e.getY() >= meetingOptionBar.getBottomBarTop()) {
-//                    return true;
-//                }
-//            }
-//            if (mMeetingService.getMeetingStatus() == MeetingStatus.MEETING_STATUS_INMEETING) {
-//                meetingOptionBar.hideOrShowToolbar(meetingOptionBar.isShowing());
-//            }
-//            return true;
-//        }
-//    }
+    class GestureDetectorListener extends GestureDetector.SimpleOnGestureListener {
 
-//    @Override
-//    public boolean dispatchTouchEvent(MotionEvent ev) {
-//        gestureDetector.onTouchEvent(ev);
-//        return super.dispatchTouchEvent(ev);
-//    }
+        public GestureDetectorListener() {
+            super();
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+
+            if (mDrawingView.isAnnotationStarted() || remoteControlHelper.isEnableRemoteControl()) {
+                meetingOptionBar.hideOrShowToolbar(true);
+                return true;
+            }
+            int orientation = getResources().getConfiguration().orientation;
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if ((videoListLayout.getVisibility() == View.VISIBLE && (e.getX() >= videoListLayout.getLeft() || e.getY() <= meetingOptionBar.getTopBarHeight())) || e.getY() >= meetingOptionBar.getBottomBarTop()) {
+                    return true;
+                }
+            } else {
+                if ((videoListLayout.getVisibility() == View.VISIBLE && (e.getY() >= videoListLayout.getTop() || e.getY() <= meetingOptionBar.getTopBarHeight())) || e.getY() >= meetingOptionBar.getBottomBarTop()) {
+                    return true;
+                }
+            }
+            if (mMeetingService.getMeetingStatus() == MeetingStatus.MEETING_STATUS_INMEETING) {
+                meetingOptionBar.hideOrShowToolbar(meetingOptionBar.isShowing());
+            }
+            return true;
+        }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        gestureDetector.onTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
+    }
 
     private void refreshToolbar() {
         if (mMeetingService.getMeetingStatus() == MeetingStatus.MEETING_STATUS_INMEETING) {
@@ -363,15 +339,13 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
             meetingOptionBar.updateMeetingNumber(mInMeetingService.getCurrentMeetingNumber() + "");
             meetingOptionBar.updateMeetingPassword(mInMeetingService.getMeetingPassword());
             meetingOptionBar.refreshToolbar();
-            meetingOptionBar.restoreFocus();
         } else {
             if (mMeetingService.getMeetingStatus() == MeetingStatus.MEETING_STATUS_CONNECTING) {
                 mConnectingText.setVisibility(View.VISIBLE);
             } else {
                 mConnectingText.setVisibility(View.GONE);
             }
-            meetingOptionBar.restoreFocus();
-            //meetingOptionBar.hideOrShowToolbar(true);
+            meetingOptionBar.hideOrShowToolbar(true);
         }
     }
 
@@ -702,7 +676,7 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
 
         @Override
         public void onClickChats() {
-            mInMeetingService.showZoomParticipantsUI(MyMeetingActivity.this, REQUEST_PLIST);
+            mInMeetingService.showZoomParticipantsUI(MyMeetingActivity2.this, REQUEST_PLIST);
         }
 
         @Override
@@ -725,13 +699,13 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         @Override
         public void onClickLowerAllHands() {
             if (mInMeetingService.lowerAllHands() == SDKERR_SUCCESS)
-                Toast.makeText(MyMeetingActivity.this, "Lower all hands successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MyMeetingActivity2.this, "Lower all hands successfully", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onClickReclaimHost() {
             if (mInMeetingService.reclaimHost() == SDKERR_SUCCESS)
-                Toast.makeText(MyMeetingActivity.this, "Reclaim host successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MyMeetingActivity2.this, "Reclaim host successfully", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -749,22 +723,6 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
     @Override
     public void onBackPressed() {
         Log.i(TAG, "onBackPressed");
-//        if (mMeetingService.getMeetingStatus() == MeetingStatus.MEETING_STATUS_INMEETING) {
-//            //stop share
-//            if (currentLayoutType == LAYOUT_TYPE_VIEW_SHARE) {
-//                mDefaultVideoViewMgr.removeShareVideoUnit();
-//                currentLayoutType = -1;
-//            }
-//            if (from == 3) {
-//                ZoomSDK.getInstance().getMeetingService().leaveCurrentMeeting(false);
-//                finish();
-//            } else {
-//                showMainActivity();
-//            }
-//
-//        } else {
-//            showLeaveMeetingDialog();
-//        }
         showLeaveMeetingDialog();
     }
 
@@ -1179,7 +1137,7 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
                 mBtnJoinBo.setVisibility(View.GONE);
                 meetingOptionBar.updateMeetingNumber(iboAttendee.GetBoName());
             } else {
-                ZMAlertDialog.Builder builder = new ZMAlertDialog.Builder(MyMeetingActivity.this)
+                ZMAlertDialog.Builder builder = new ZMAlertDialog.Builder(MyMeetingActivity2.this)
                         .setMessage("The host is inviting you to join Breakout Room: " + iboAttendee.GetBoName())
                         .setNegativeButton("Later", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
