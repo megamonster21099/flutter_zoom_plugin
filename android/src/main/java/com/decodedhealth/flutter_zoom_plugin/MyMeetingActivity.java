@@ -221,7 +221,7 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     public void onAppOnPause() {
         Log.i(TAG, "onAppOnPause");
-        leave(false);
+        //leave(false);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
