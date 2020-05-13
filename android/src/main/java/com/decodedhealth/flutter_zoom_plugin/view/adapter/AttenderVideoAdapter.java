@@ -65,22 +65,37 @@ public class AttenderVideoAdapter extends RecyclerView.Adapter<AttenderVideoAdap
         @Override
         public void onClick(View view) {
             Long userId = (Long) view.getTag();
-            if (userId == getSelectedUserId()) {
-                return;
-            }
-            if (null != listener) {
+            if (view.isSelected()) return;
+            if (listener != null) {
                 int position = userList.indexOf(userId);
                 if (position >= userList.size()) {
                     return;
                 }
                 listener.onItemClick(view, position, userId);
-                if (null != selectedView) {
-                    selectedView.setBackgroundResource(0);
+                if (selectedView != null) {
+                    selectedView.setSelected(false);
                 }
-                view.setBackgroundResource(R.drawable.video_bg);
+                view.setSelected(true);
                 selectedView = view;
                 selected = position;
             }
+//            Long userId = (Long) view.getTag();
+//            if (userId == getSelectedUserId()) {
+//                return;
+//            }
+//            if (null != listener) {
+//                int position = userList.indexOf(userId);
+//                if (position >= userList.size()) {
+//                    return;
+//                }
+//                listener.onItemClick(view, position, userId);
+//                if (null != selectedView) {
+//                    selectedView.setBackgroundResource(0);
+//                }
+//                view.setBackgroundResource(R.drawable.video_bg);
+//                selectedView = view;
+//                selected = position;
+//            }
         }
     };
 
@@ -101,12 +116,12 @@ public class AttenderVideoAdapter extends RecyclerView.Adapter<AttenderVideoAdap
 
         if (position == selected) {
             if (null != selectedView) {
-                selectedView.setBackgroundResource(0);
+                selectedView.setSelected(false);
             }
-            holder.root.setBackgroundResource(R.drawable.video_bg);
+            holder.root.setSelected(true);
             selectedView = holder.root;
         } else {
-            holder.root.setBackgroundResource(0);
+            holder.root.setSelected(false);
         }
     }
 

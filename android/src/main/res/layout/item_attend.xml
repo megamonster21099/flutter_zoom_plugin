@@ -3,13 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/selector_rect"
     android:padding="3dp">
 
     <us.zoom.sdk.MobileRTCVideoView
         android:id="@+id/item_videoView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
     </us.zoom.sdk.MobileRTCVideoView>
 
 </LinearLayout>

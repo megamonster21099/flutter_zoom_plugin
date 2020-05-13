@@ -67,7 +67,8 @@
                 android:layout_height="wrap_content"
                 android:clickable="false"
                 android:focusable="false"
-                android:src="@drawable/arrow_down_normal" />
+                android:src="@drawable/arrow_down_normal"
+                android:visibility="invisible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/videoList"

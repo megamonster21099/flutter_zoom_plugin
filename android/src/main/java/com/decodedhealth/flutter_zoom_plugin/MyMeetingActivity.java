@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -237,19 +238,27 @@ public class MyMeetingActivity extends ZMActivity implements View.OnClickListene
         leave(false);
     }
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        Log.i(TAG, "dispatchKeyEvent " + event.getKeyCode());
+        return super.dispatchKeyEvent(event);
+    }
+
     private void onLayoutContentFocusChanged(View v, boolean hasFocus) {
         Log.i(TAG, "onFocusChanged " + hasFocus + " " + currentLayoutType);
-        //FIXME: Handle different layout type
-        meetingOptionBar.restoreFocus();
-//        if (hasFocus) {
-//            switch (currentLayoutType) {
-//                case LAYOUT_TYPE_ONLY_MYSELF:
-//                    meetingOptionBar.restoreFocus();
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
+        if (hasFocus) {
+            switch (currentLayoutType) {
+                case LAYOUT_TYPE_ONLY_MYSELF:
+                    meetingOptionBar.restoreFocus();
+                    break;
+                case LAYOUT_TYPE_LIST_VIDEO:
+                    mVideoListView.requestFocus();
+                    break;
+                default:
+                    meetingOptionBar.restoreFocus();
+                    break;
+            }
+        }
     }
 
     MeetingVideoHelper.VideoCallBack videoCallBack = new MeetingVideoHelper.VideoCallBack() {
